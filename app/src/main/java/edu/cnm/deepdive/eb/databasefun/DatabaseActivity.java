@@ -11,18 +11,24 @@ import edu.cnm.deepdive.eb.databasefun.fragments.AddContentFragment;
 public class DatabaseActivity extends AppCompatActivity {
 
   public DatabaseHelper dbHelper;
+  private ListView databaseListView;
+  private SQLiteDatabase sqLiteDatabase;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_database);
 
-    ListView databaseListView = (ListView) findViewById(R.id.database_list);
+    databaseListView = (ListView) findViewById(R.id.database_list);
 
     dbHelper = new DatabaseHelper(this);
 
-    SQLiteDatabase sqLiteDatabase = dbHelper.getReadableDatabase();
+    sqLiteDatabase = dbHelper.getReadableDatabase();
 
+    refresh();
+  }
+
+  public void refresh() {
     Cursor cursor = sqLiteDatabase.query(DatabaseHelper.DATABASE_TABLE,
         new String[]{DatabaseHelper.ID_COLUMN, DatabaseHelper.CONTENT_COLUMN, DatabaseHelper.COLOR_COLUMN},
         null, null, null, null, null);
@@ -31,12 +37,16 @@ public class DatabaseActivity extends AppCompatActivity {
         cursor, true);
 
     databaseListView.setAdapter(cursorAdapter);
-    dbHelper.close();
-
   }
 
   public void showAddDialog(View view) {
     AddContentFragment dialog = new AddContentFragment();
     dialog.show(getSupportFragmentManager(), "AddContentFragment");
+  }
+
+  @Override
+  protected void onDestroy() {
+    dbHelper.close();
+    super.onDestroy();
   }
 }

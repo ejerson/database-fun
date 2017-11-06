@@ -28,8 +28,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
   @Override
   public void onCreate(SQLiteDatabase sqLiteDatabase) {
     sqLiteDatabase.execSQL(SCRIPT_CREATE_DATABASE);
-    insert(sqLiteDatabase, "This Should be Red", "#FF0000");
-    insert(sqLiteDatabase, "This Should be Light Green", "#FF69B4");
   }
 
   @Override

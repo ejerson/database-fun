@@ -6,10 +6,13 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 import edu.cnm.deepdive.eb.databasefun.DatabaseActivity;
 import edu.cnm.deepdive.eb.databasefun.R;
 
@@ -21,18 +24,37 @@ public class AddContentFragment extends DialogFragment {
 
     LayoutInflater inflater = getActivity().getLayoutInflater();
 
-    builder.setView(inflater.inflate(R.layout.dialog_add_content, null))
+    View inflatedView = inflater.inflate(R.layout.dialog_add_content, null);
+
+    // declare them final to be able to access these inside my OnClickListener
+    // this value will never change, it makes this variable immutable
+    // this variable can't refer to another textView
+    final EditText contentView = inflatedView.findViewById(R.id.new_content);
+    final EditText colorView = inflatedView.findViewById(R.id.new_color);
+
+    builder.setView(inflatedView)
 
        .setPositiveButton(R.string.ok, new OnClickListener() {
          @Override
          public void onClick(DialogInterface dialogInterface, int i) {
            SQLiteDatabase db = ((DatabaseActivity)getActivity()).dbHelper.getWritableDatabase();
 
-           String content = ((TextView) ((DatabaseActivity) getActivity()).findViewById(R.id.new_content))
-               .getText().toString();
-           String color = ((TextView) ((DatabaseActivity) getActivity()).findViewById(R.id.new_content))
-               .getText().toString();
-           ((DatabaseActivity)getActivity()).dbHelper.insert(db, content, color);
+           String content = contentView.getText().toString();
+           String color = colorView.getText().toString();
+
+           try {
+             // post to database if color is valid
+             Color.parseColor(color);
+             // add to database
+             ((DatabaseActivity)getActivity()).dbHelper.insert(db, content, color);
+
+             ((DatabaseActivity)getActivity()).refresh();
+           } catch (IllegalArgumentException e) {
+             Toast toast = Toast.makeText(getContext(), "Invalid Color, Try Again", Toast.LENGTH_SHORT);
+                 toast.show();
+           }
+
+
          }
        })
         .setNegativeButton(R.string.cancel, new OnClickListener() {
